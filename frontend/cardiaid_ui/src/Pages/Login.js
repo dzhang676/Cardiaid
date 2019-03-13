@@ -57,23 +57,22 @@ export default class Login extends React.Component {
         )
         .then(response => {
           this.setState({ status: response.data });
+          if (this.state.status === "login successful") {
+            this.props.changeState();
+            this.setState({
+              usernameReq: false,
+              passwordReq: false,
+              wrongInfo: false
+            });
+          } else {
+            this.setState({
+              wrongInfo: true,
+              usernameReq: false,
+              passwordReq: false
+            });
+          }
         })
         .catch(error => console.log(error));
-
-      if (this.state.status === "login successful") {
-        this.props.changeState();
-        this.setState({
-          usernameReq: false,
-          passwordReq: false,
-          wrongInfo: false
-        });
-      } else {
-        this.setState({
-          wrongInfo: true,
-          usernameReq: false,
-          passwordReq: false
-        });
-      }
     }
     if (this.state.username === "") {
       this.setState({ usernameReq: true });
