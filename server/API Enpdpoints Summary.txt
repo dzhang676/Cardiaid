@@ -1,0 +1,12 @@
+@app.route("/nurse/<nurseId>", methods=["GET"]) // Get an individual nurse
+@app.route("/nurse", methods=["POST"]) // Create a new nurse
+@app.route("/nurse", methods=["GET"]) // Get a dict of all nurse info
+@app.route("/nurse/<nurseId>/patientList", methods=["GET"]) // get a dict of the patients that the nurse is managing
+@app.route("/user/<userName>/<password>", methods=["GET"]) // Used for logging in, returns "invalid username", "wrong password", or "login successful"
+@app.route("/patient", methods=["POST"]) // Create new patient
+@app.route("/user", methods=["POST"]) // Create new user
+@app.route("/user", methods=["GET"])  // Get a dict of all users
+@app.route("/patient", methods=["GET"]) // Get a dict of all patients
+@app.route("/patient/<id>", methods=["GET"]) // Get an individual patient
+@app.route("/patient/<id>", methods=["PUT"]) // Update info of a patient, currently need to include all patient info in params
+@app.route("/patient/<id>", methods=["DELETE"]) // Delete a patient

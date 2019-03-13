@@ -10,7 +10,6 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'cr
 db = SQLAlchemy(app)
 ma = Marshmallow(app)
 
-
 class Patient(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(120), unique=False)
@@ -25,8 +24,6 @@ class Patient(db.Model):
     medicalConditions = db.Column(db.String(120), unique=False)
     notes = db.Column(db.String(120), unique=False)
     nurse = db.Column(db.Integer, unique=False)
-
-
 
     def __init__(self, id, name, age, medication, roomNumber, heartRate, bloodOxygen, 
         birthDate, sex, allergies, medicalConditions, notes, nurse):
@@ -43,7 +40,6 @@ class Patient(db.Model):
         self.medicalConditions = medicalConditions
         self.notes = notes
         self.nurse = nurse
-
 
 class PatientSchema(ma.Schema):
     class Meta:
@@ -106,13 +102,25 @@ def add_user():
 
     return jsonify(new_nurse)
 
-# endpoint to show all users
+# endpoint to show all nurses
 @app.route("/nurse", methods=["GET"])
 def get_users():
     all_nurses = Nurse.query.all()
     result = nurses_schema.dump(all_nurses)
     return jsonify(result.data)
 
+# endpoint to get nurses patient list
+@app.route("/nurse/<nurseId>/patientList", methods=["GET"])
+def get_patient_list(nurseId):
+    nurse = Nurse.query.get(nurseId)
+    patientIds = nurse.patientList.split(',')
+    patientDict = {}
+
+    for id in patientIds:
+        patient = Patient.query.get(id)
+        patientDict[patient.name] = {"roomNumber": patient.roomNumber, "age": patient.age}
+    
+    return patientDict
 
 # login endpoint
 @app.route("/user/<userName>/<password>", methods=["GET"])
