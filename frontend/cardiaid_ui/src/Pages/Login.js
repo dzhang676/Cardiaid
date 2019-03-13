@@ -22,7 +22,9 @@ export default class Login extends React.Component {
       password: "",
       login: props.login,
       usernameReq: false,
-      passwordReq: false
+      passwordReq: false,
+      wrongInfo: false,
+      status: ""
     };
   }
 
@@ -46,8 +48,32 @@ export default class Login extends React.Component {
 
   handleLogin = () => {
     if (this.state.username !== "" && this.state.password !== "") {
-      this.props.changeState();
-      this.setState({ usernameReq: false, passwordReq: false });
+      axios
+        .get(
+          "http://localhost:5000/user/" +
+            this.state.username +
+            "/" +
+            this.state.password
+        )
+        .then(response => {
+          this.setState({ status: response.data });
+        })
+        .catch(error => console.log(error));
+
+      if (this.state.status === "login successful") {
+        this.props.changeState();
+        this.setState({
+          usernameReq: false,
+          passwordReq: false,
+          wrongInfo: false
+        });
+      } else {
+        this.setState({
+          wrongInfo: true,
+          usernameReq: false,
+          passwordReq: false
+        });
+      }
     }
     if (this.state.username === "") {
       this.setState({ usernameReq: true });
@@ -58,7 +84,7 @@ export default class Login extends React.Component {
   };
 
   render() {
-    console.log(this.state.login);
+    console.log(this.state.password);
     return (
       <div style={{ height: this.state.height, overflowY: "hidden" }}>
         <div className="row">
@@ -92,6 +118,8 @@ export default class Login extends React.Component {
               <FormFeedback className="feedbackFont">
                 {this.state.usernameReq
                   ? "Empty Field - Please fill in your username"
+                  : this.state.wrongInfo
+                  ? "Invalid username or password"
                   : null}
               </FormFeedback>
             </Form>
@@ -108,6 +136,8 @@ export default class Login extends React.Component {
               <FormFeedback className="feedbackFont">
                 {this.state.passwordReq
                   ? "Empty Field - Please fill in your password"
+                  : this.state.wrongInfo
+                  ? "Invalid username or password"
                   : null}
               </FormFeedback>
             </Form>
