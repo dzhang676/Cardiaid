@@ -10,6 +10,7 @@ import {
 } from "reactstrap";
 import LoginStyles from "../Styles/loginStyles.css";
 import loginImage from "../Images/loginImage.png";
+import axios from "axios";
 
 export default class Login extends React.Component {
   constructor(props) {
