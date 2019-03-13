@@ -11,7 +11,7 @@ db = SQLAlchemy(app)
 ma = Marshmallow(app)
 
 
-class User(db.Model):
+class Patient(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(120), unique=False)
     age = db.Column(db.Integer, unique=False)
@@ -45,20 +45,65 @@ class User(db.Model):
         self.nurse = nurse
 
 
-class UserSchema(ma.Schema):
+class PatientSchema(ma.Schema):
     class Meta:
         # Fields to expose
         fields = ('name', 'age', 'medication', 'roomNumber', 'heartRate', 'bloodOxygen', 
         'birthDate', 'sex', 'allergies', 'medicalConditions', 'notes', 'nurse')
 
+class User(db.Model):
+    userName = db.Column(db.String(120), primary_key=True)
+    password = db.Column(db.String(120), unique=False)
+
+    def __init__(self, userName, password):
+        self.userName = userName
+        self.password = password
+
+class UserSchema(ma.Schema):
+    class Meta:
+        # Fields to expose
+        fields = ('userName', 'password')
+
+
+patient_schema = PatientSchema()
+patients_schema = PatientSchema(many=True)
 
 user_schema = UserSchema()
 users_schema = UserSchema(many=True)
 
+# login endpoint
+@app.route("/user/<userName>/<password>", methods=["GET"])
+def get_user(userName, password):
+    user = User.query.get(userName)
+    if not user:
+        return "invalid username"
+    if password != user.password:
+        return "wrong password"
+    else:
+        return "login successful"
 
 # endpoint to create new user
 @app.route("/user", methods=["POST"])
 def add_user():
+    userName = request.args['userName']
+    password = request.args['password']
+    new_user = User(userName, password)
+    db.session.add(new_user)
+    db.session.commit()
+
+    return jsonify(new_user)
+
+# endpoint to show all users
+@app.route("/user", methods=["GET"])
+def get_users():
+    all_users = User.query.all()
+    result = users_schema.dump(all_users)
+    return jsonify(result.data)
+
+
+# endpoint to create new patient
+@app.route("/patient", methods=["POST"])
+def add_patient():
     id = request.args['id']
     name = request.args['name']
     age = request.args['age']
@@ -73,33 +118,33 @@ def add_user():
     notes = request.args['notes']
     nurse = request.args['nurse']
     
-    new_user = User(id, name, age, medication, roomNumber, heartRate, bloodOxygen, 
+    new_patient = Patient(id, name, age, medication, roomNumber, heartRate, bloodOxygen, 
         birthDate, sex, allergies, medicalConditions, notes, nurse)
 
-    db.session.add(new_user)
+    db.session.add(new_patient)
     db.session.commit()
 
-    return jsonify(new_user)
+    return jsonify(new_patient)
 
-# endpoint to show all users
-@app.route("/user", methods=["GET"])
-def get_user():
-    all_users = User.query.all()
-    result = users_schema.dump(all_users)
+# endpoint to show all patients
+@app.route("/patient", methods=["GET"])
+def get_patient():
+    all_patients = Patient.query.all()
+    result = patients_schema.dump(all_patients)
     return jsonify(result.data)
 
 
-# endpoint to get user detail by id
-@app.route("/user/<id>", methods=["GET"])
-def user_detail(id):
-    user = User.query.get(id)
-    return user_schema.jsonify(user)
+# endpoint to get patient detail by id
+@app.route("/patient/<id>", methods=["GET"])
+def patient_detail(id):
+    patient = Patient.query.get(id)
+    return patient_schema.jsonify(patient)
 
 
-# endpoint to update user
-@app.route("/user/<id>", methods=["PUT"])
-def user_update(id):
-    user = User.query.get(id)
+# endpoint to update patient
+@app.route("/patient/<id>", methods=["PUT"])
+def patient_update(id):
+    patient = Patient.query.get(id)
     id = request.args['id']
     name = request.args['name']
     age = request.args['age']
@@ -114,30 +159,30 @@ def user_update(id):
     notes = request.args['notes']
     nurse = request.args['nurse']
 
-    user.id = id
-    user.name = name
-    user.age = age
-    user.medication = medication
-    user.roomNumber = roomNumber
-    user.heartRate = heartRate
-    user.bloodOxygen = bloodOxygen
-    user.birthDate = birthDate
-    user.sex = sex
-    user.allergies = allergies
-    user.medicalConditions = medicalConditions
-    user.notes = notes
-    user.nurese = nurse
+    patient.id = id
+    patient.name = name
+    patient.age = age
+    patient.medication = medication
+    patient.roomNumber = roomNumber
+    patient.heartRate = heartRate
+    patient.bloodOxygen = bloodOxygen
+    patient.birthDate = birthDate
+    patient.sex = sex
+    patient.allergies = allergies
+    patient.medicalConditions = medicalConditions
+    patient.notes = notes
+    patient.nurese = nurse
 
     db.session.commit()
-    return user_schema.jsonify(user)
+    return patient_schema.jsonify(patient)
 
-# endpoint to delete user
-@app.route("/user/<id>", methods=["DELETE"])
-def user_delete(id):
-    user = User.query.get(id)
-    db.session.delete(user)
+# endpoint to delete patient
+@app.route("/patient/<id>", methods=["DELETE"])
+def patient_delete(id):
+    patient = Patient.query.get(id)
+    db.session.delete(patient)
     db.session.commit()
-    return user_schema.jsonify(user)
+    return patient_schema.jsonify(patient)
 
 
 if __name__ == '__main__':
