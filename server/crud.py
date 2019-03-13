@@ -64,12 +64,55 @@ class UserSchema(ma.Schema):
         # Fields to expose
         fields = ('userName', 'password')
 
+class Nurse(db.Model):
+    nurseId = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(120), unique=False)
+    patientList = db.Column(db.String(120), unique=False)
+
+    def __init__(self, nurseId, name, patientList):
+        self.nurseId = nurseId
+        self.name = name
+        self.patientList = patientList
+        
+class NurseSchema(ma.Schema):
+    class Meta:
+        # Fields to expose
+        fields = ('nurseId', 'name', 'patientList')
 
 patient_schema = PatientSchema()
 patients_schema = PatientSchema(many=True)
 
 user_schema = UserSchema()
 users_schema = UserSchema(many=True)
+
+nurse_schema = NurseSchema()
+nurses_schema = NurseSchema(many=True)
+
+# get individual nurse
+@app.route("/nurse/<nurseId>", methods=["GET"])
+def get_nurse(nurseId):
+    nurse = Nurse.query.get(nurseId)
+    return nurse_schema.jsonify(nurse)
+
+# endpoint to create new nurse
+@app.route("/nurse", methods=["POST"])
+def add_user():
+    nurseId = request.args['nurseId']
+    name = request.args['name']
+    patientList = request.args['patientList']
+    new_nurse = Nurse(nurseId, name, patientList)
+    db.session.add(new_nurse)
+    db.session.commit()
+
+    return jsonify(new_nurse)
+
+# endpoint to show all users
+@app.route("/nurse", methods=["GET"])
+def get_users():
+    all_nurses = Nurse.query.all()
+    result = nurses_schema.dump(all_nurses)
+    return jsonify(result.data)
+
 
 # login endpoint
 @app.route("/user/<userName>/<password>", methods=["GET"])
