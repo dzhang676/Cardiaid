@@ -1,31 +1,9 @@
 import React from "react";
-import PropTypes from "prop-types";
 import AppBar from "@material-ui/core/AppBar";
-import Toolbar from "@material-ui/core/Toolbar";
-import IconButton from "@material-ui/core/IconButton";
-import Typography from "@material-ui/core/Typography";
-import InputBase from "@material-ui/core/InputBase";
-import Badge from "@material-ui/core/Badge";
-import MenuItem from "@material-ui/core/MenuItem";
-import Menu from "@material-ui/core/Menu";
-import { fade } from "@material-ui/core/styles/colorManipulator";
-import { withStyles } from "@material-ui/core/styles";
 import MenuIcon from "@material-ui/icons/Menu";
 import SearchIcon from "@material-ui/icons/Search";
-import AccountCircle from "@material-ui/icons/AccountCircle";
-import MailIcon from "@material-ui/icons/Mail";
-import NotificationsIcon from "@material-ui/icons/Notifications";
-import MoreIcon from "@material-ui/icons/MoreVert";
 import dashboardStyles from "../../Styles/dashboardStyles.css";
-import {
-  Button,
-  Form,
-  FormGroup,
-  Label,
-  Input,
-  FormText,
-  FormFeedback
-} from "reactstrap";
+import { Form, FormGroup } from "reactstrap";
 
 export default class Navbar extends React.Component {
   constructor(props) {
@@ -43,31 +21,25 @@ export default class Navbar extends React.Component {
           paddingLeft: "30px"
         }}
       >
-        <div class="row">
+        <div className="row verticalAlign">
           <MenuIcon
             style={{
               height: "35px",
               width: "35px",
-              color: "black",
-              marginTop: "13px"
+              color: "black"
             }}
-            className="verticalAlign"
           />
-          <p className="font verticalAlign" style={{ paddingLeft: "15px" }}>
+          <p className="font" style={{ paddingLeft: "15px" }}>
             Cardiaid
           </p>
-          <div
-            className="searchBox verticalAlign"
-            style={{ marginLeft: "70%", marginTop: "20px" }}
-          >
+          <div className="searchBox row" style={{ marginLeft: "70%" }}>
             <SearchIcon
               style={{ height: "25px", width: "25px", color: "#aaaaaa" }}
             />
             <Form
-              className="verticalAlign"
               style={{
                 position: "absolute",
-                marginLeft: "32px",
+                marginLeft: "35px",
                 color: "#aaaaaa"
               }}
             >

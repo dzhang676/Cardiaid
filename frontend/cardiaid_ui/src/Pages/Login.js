@@ -109,7 +109,7 @@ export default class Login extends React.Component {
                 <input
                   type="text"
                   placeholder="username"
-                  className="usernameFont formBox"
+                  className="usernameFont FormBox"
                   value={this.state.username}
                   onChange={this.handleChange("username")}
                 />
@@ -122,7 +122,7 @@ export default class Login extends React.Component {
                   : null}
               </FormFeedback>
             </Form>
-            <Form className="formBox" style={{ marginBottom: "20px" }}>
+            <Form className="FormBox" style={{ marginBottom: "20px" }}>
               <FormGroup>
                 <input
                   type="password"
