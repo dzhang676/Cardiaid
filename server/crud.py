@@ -119,7 +119,7 @@ def get_nurse(nurseId):
 
 # endpoint to create new nurse
 @app.route("/nurse", methods=["POST"])
-def add_user():
+def add_nurse():
     nurseId = request.args['nurseId']
     name = request.args['name']
     patientList = request.args['patientList']
