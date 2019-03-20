@@ -131,7 +131,7 @@ def add_nurse():
 
 # endpoint to show all nurses
 @app.route("/nurse", methods=["GET"])
-def get_users():
+def get_nurses():
     all_nurses = Nurse.query.all()
     result = nurses_schema.dump(all_nurses)
     return jsonify(result.data)
