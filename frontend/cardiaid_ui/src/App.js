@@ -5,7 +5,7 @@ import Dashboard from "./Pages/Dashboard";
 class App extends Component {
   constructor(props) {
     super(props);
-    this.state = { width: 0, height: 0, login: true };
+    this.state = { width: 0, height: 0, login: false };
     this.updateWindowDimensions = this.updateWindowDimensions.bind(this);
   }
 
@@ -38,7 +38,7 @@ class App extends Component {
         />
       );
     } else {
-      return <Dashboard />;
+      return <Dashboard height={this.state.height} width={this.state.width} />;
     }
   }
 }

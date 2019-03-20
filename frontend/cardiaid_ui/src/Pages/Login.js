@@ -18,8 +18,8 @@ export default class Login extends React.Component {
     this.state = {
       height: props.height,
       width: props.width,
-      username: "",
-      password: "",
+      username: "masterUser",
+      password: "masterUser",
       login: props.login,
       usernameReq: false,
       passwordReq: false,
