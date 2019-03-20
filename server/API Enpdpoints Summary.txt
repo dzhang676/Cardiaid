@@ -10,3 +10,5 @@
 @app.route("/patient/<id>", methods=["GET"]) // Get an individual patient
 @app.route("/patient/<id>", methods=["PUT"]) // Update info of a patient, currently need to include all patient info in params
 @app.route("/patient/<id>", methods=["DELETE"]) // Delete a patient
+@app.route("/alerts", methods=["GET"]) // Get all current alerts
+

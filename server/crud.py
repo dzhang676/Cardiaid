@@ -75,6 +75,24 @@ class NurseSchema(ma.Schema):
         # Fields to expose
         fields = ('nurseId', 'name', 'patientList')
 
+class Alerts(db.Model):
+    alertId = db.Column(db.Integer, primary_key=True)
+    nurse = db.Column(db.Integer, unique=False)
+    heartRate = db.Column(db.Integer, unique=False)
+    bloodOxygen = db.Column(db.Integer, unique=False)
+    reason = db.Column(db.String(120), unique=False)
+    def __init__(self, alertId, nurse, heartRate, bloodOxygen, reason):
+        self.alertId = alertId
+        self.nurse = nurse
+        self.heartRate = heartRate
+        self.bloodOxygen = bloodOxygen
+        self.reason = reason
+
+class AlertSchema(ma.Schema):
+    class Meta:
+        # Fields to expose
+        fields = ('alertId', 'nurse', 'heartRate', 'bloodOxygen', 'reason')
+
 patient_schema = PatientSchema()
 patients_schema = PatientSchema(many=True)
 
@@ -83,6 +101,15 @@ users_schema = UserSchema(many=True)
 
 nurse_schema = NurseSchema()
 nurses_schema = NurseSchema(many=True)
+
+alerts_schema = AlertSchema(many=True)
+
+# endpoint to return all alerts
+@app.route("/alerts", methods=["GET"])
+def get_alerts():
+    all_alerts = Alerts.query.all()
+    result = alerts_schema.dump(all_alerts)
+    return jsonify(result.data)
 
 # get individual nurse
 @app.route("/nurse/<nurseId>", methods=["GET"])
@@ -118,7 +145,7 @@ def get_patient_list(nurseId):
 
     for id in patientIds:
         patient = Patient.query.get(id)
-        patientDict[patient.name] = {"roomNumber": patient.roomNumber, "age": patient.age}
+        patientDict[patient.name] = {"roomNumber": patient.roomNumber, "age": patient.age, "name": patient.name}
     
     return patientDict
 
