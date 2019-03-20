@@ -4,6 +4,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_marshmallow import Marshmallow
 import os
 
+import threading
 app = Flask(__name__)
 basedir = os.path.abspath(os.path.dirname(__file__))
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'crud.sqlite')
@@ -24,9 +25,10 @@ class Patient(db.Model):
     medicalConditions = db.Column(db.String(120), unique=False)
     notes = db.Column(db.String(120), unique=False)
     nurse = db.Column(db.Integer, unique=False)
+    deviceStatus = db.Column(db.Boolean, unique = False)
 
     def __init__(self, id, name, age, medication, roomNumber, heartRate, bloodOxygen, 
-        birthDate, sex, allergies, medicalConditions, notes, nurse):
+        birthDate, sex, allergies, medicalConditions, notes, nurse, deviceStatus):
         self.id = id
         self.name = name
         self.age = age
@@ -40,12 +42,13 @@ class Patient(db.Model):
         self.medicalConditions = medicalConditions
         self.notes = notes
         self.nurse = nurse
+        self.deviceStatus = deviceStatus
 
 class PatientSchema(ma.Schema):
     class Meta:
         # Fields to expose
         fields = ('name', 'age', 'medication', 'roomNumber', 'heartRate', 'bloodOxygen', 
-        'birthDate', 'sex', 'allergies', 'medicalConditions', 'notes', 'nurse')
+        'birthDate', 'sex', 'allergies', 'medicalConditions', 'notes', 'nurse', 'deviceStatus')
 
 class User(db.Model):
     userName = db.Column(db.String(120), primary_key=True)
@@ -195,9 +198,10 @@ def add_patient():
     medicalConditions = request.args['medicalConditions']
     notes = request.args['notes']
     nurse = request.args['nurse']
+    deviceStatus = request.args['deviceStatus']
     
     new_patient = Patient(id, name, age, medication, roomNumber, heartRate, bloodOxygen, 
-        birthDate, sex, allergies, medicalConditions, notes, nurse)
+        birthDate, sex, allergies, medicalConditions, notes, nurse, deviceStatus)
 
     db.session.add(new_patient)
     db.session.commit()
@@ -236,7 +240,7 @@ def patient_update(id):
     medicalConditions = request.args['medicalConditions']
     notes = request.args['notes']
     nurse = request.args['nurse']
-
+    deviceStatus = request.args['deviceStatus']
     patient.id = id
     patient.name = name
     patient.age = age
@@ -250,7 +254,7 @@ def patient_update(id):
     patient.medicalConditions = medicalConditions
     patient.notes = notes
     patient.nurese = nurse
-
+    patient.deviceStatus = deviceStatus
     db.session.commit()
     return patient_schema.jsonify(patient)
 
