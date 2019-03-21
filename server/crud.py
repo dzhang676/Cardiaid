@@ -3,6 +3,7 @@ from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_marshmallow import Marshmallow
 import os
+from deviceInterface import ArduinoInterface
 
 import threading
 app = Flask(__name__)
@@ -107,17 +108,20 @@ nurses_schema = NurseSchema(many=True)
 
 alerts_schema = AlertSchema(many=True)
 
-class myThread(threading.Thread):
-   def __init__(self):
-      threading.Thread.__init__(self)
+class ArduinoReadingThread(threading.Thread):
+    arduinoInterface = ArduinoInterface()
+    def __init__(self):
+       threading.Thread.__init__(self)
 
-   def run(self):
-      while(True):
-        user = User.query.get("masterUser")
-        user.password += "b"
-        db.session.commit()
+    def run(self):
+        while(True):
+            data = self.arduinoInterface.returnVitals()
+            user = User.query.get('masterUser')
+            if user.password != data["HR"]: # change this code
+                user.password = data["HR"]
+                db.session.commit()
 
-arduinoReadingThread = myThread()
+arduinoReadingThread = ArduinoReadingThread()
 arduinoReadingThread.start()
 
 # endpoint to return all alerts
