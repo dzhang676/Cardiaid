@@ -3,11 +3,19 @@ import Drawer from "@material-ui/core/Drawer";
 import menuStyles from "../../Styles/menuStyles.css";
 import OpenIcon from "@material-ui/icons/ZoomOutMap";
 import { Line } from "react-chartjs-2";
+import CanvasJSReact from "../../canvasjs.react";
+var CanvasJS = CanvasJSReact.CanvasJS;
+var CanvasJSChart = CanvasJSReact.CanvasJSChart;
 
 export default class HalfMenu extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { currentList: props.currentList, cardPress: props.cardPress };
+    this.state = {
+      currentList: props.currentList,
+      cardPress: props.cardPress,
+      heartRate: true,
+      bloodOxygen: false
+    };
   }
 
   componentWillReceiveProps(nextProps) {
@@ -19,54 +27,64 @@ export default class HalfMenu extends React.Component {
     }
   }
 
-  createGraph = () => {
-    const data = {
-      labels: [
-        "19:00",
-        "19:15",
-        "19:30",
-        "19:45",
-        "20:00",
-        "20:15",
-        "20:30",
-        "20:45",
-        "21:00",
-        "21:15"
-      ],
-      datasets: [
+  createGraph = list => {
+    const options = {
+      title: {
+        text: "title",
+        padding: {
+          top: 5
+        },
+        fontColor: "#424259"
+      },
+      data: [
         {
-          label: "Heart Rate",
-          fill: false,
-          lineTension: 0.1,
-          backgroundColor: "#373749",
-          borderColor: "purple",
-          borderCapStyle: "butt",
-          borderDash: [],
-          borderDashOffset: 0.0,
-          borderJoinStyle: "miter",
-          pointBorderColor: "purple",
-          pointBackgroundColor: "purple",
-          pointBorderWidth: 1,
-          pointHoverRadius: 5,
-          pointHoverBackgroundColor: "rgba(75,192,192,1)",
-          pointHoverBorderColor: "rgba(220,220,220,1)",
-          pointHoverBorderWidth: 2,
-          pointRadius: 1,
-          pointHitRadius: 10,
-          data: [55, 59, 66, 70, 73, 65, 60, 55, 67, 78],
-          color: "white"
+          type: "line",
+          dataPoints: [
+            { label: "19:00", y: 50 },
+            { label: "19:15", y: 60 },
+            { label: "19:30", y: 65 },
+            { label: "19:45", y: 60 },
+            { label: "20:00", y: 57 }
+          ],
+          color: "#ad1aa1"
         }
-      ]
+      ],
+      axisX: {
+        labelFontColor: "white",
+        title: "title",
+        titleFontColor: "#424259",
+        margin: 2,
+        tickLength: 10,
+        gridColor: "#4f5763",
+        lineColor: "#4f5763",
+        tickColor: "#424259",
+        labelFontSize: 13
+      },
+      axisY: {
+        labelFontColor: "white",
+        gridColor: "#4f5763",
+        tickLength: 5,
+        tickColor: "#424259",
+        lineColor: "#4f5763",
+        labelFontSize: 13
+      },
+      height: 260,
+      width: 615,
+      backgroundColor: "#424259"
     };
     return (
-      <Line
-        data={data}
-        height={300}
-        options={{
-          maintainAspectRatio: false
-        }}
-        style={{ paddingLeft: "20px", width: "50px" }}
-      />
+      <div>
+        <CanvasJSChart options={options} />
+        <div
+          style={{
+            position: "absolute",
+            backgroundColor: "#424259",
+            height: "20px",
+            width: "60px",
+            marginTop: "-20px"
+          }}
+        />
+      </div>
     );
   };
 
@@ -94,17 +112,112 @@ export default class HalfMenu extends React.Component {
               }}
             />
           </div>
-          <div>
+          <div style={{ marginTop: "-15px" }}>
             <p className="menuNameFont">{list.name.slice(1, -1)}</p>
           </div>
           <div
+            className="menuRow"
             style={{
-              backgroundColor: "#373749",
-              width: "600px",
-              marginLeft: "40px"
+              marginLeft: "40px",
+              paddingBottom: "10px",
+              marginTop: "-25px"
             }}
           >
-            {this.createGraph()}
+            <div
+              className="menuCol"
+              onClick={() => {
+                this.setState({ heartRate: true, bloodOxygen: false });
+              }}
+            >
+              <p
+                style={{
+                  marginBottom: "2px",
+                  color: this.state.heartRate ? "grey" : "white",
+                  cursor: "pointer"
+                }}
+                className="switchFont"
+              >
+                heart rate
+              </p>
+              <div
+                className="lineStyle"
+                style={{
+                  border: this.state.heartRate
+                    ? "1.5px solid #ff0000"
+                    : "1.5px solid white"
+                }}
+              />
+            </div>
+            <div
+              className="menuCol"
+              onClick={() => {
+                this.setState({ heartRate: false, bloodOxygen: true });
+              }}
+            >
+              <p
+                style={{
+                  marginBottom: "2px",
+                  color: this.state.bloodOxygen ? "grey" : "white",
+                  cursor: "pointer"
+                }}
+                className="switchFont"
+              >
+                blood oxygen
+              </p>
+              <div
+                className="lineStyle"
+                style={{
+                  border: this.state.bloodOxygen
+                    ? "1.5px solid #ff0000"
+                    : "1.5px solid white"
+                }}
+              />
+            </div>
+            <p
+              style={{
+                position: "absolute",
+                marginTop: "17px",
+                marginLeft: "80%"
+              }}
+              className="sensorFont"
+            >
+              {list.heartRate} bpm
+            </p>
+          </div>
+          <div
+            style={{
+              marginLeft: "40px",
+              width: "4000px"
+            }}
+          >
+            {this.createGraph(this.state.currentList)}
+          </div>
+          <div
+            className="menuCol"
+            style={{ marginLeft: "40px", marginTop: "-10px" }}
+          >
+            <p className="subTitleFont">Patient Information</p>
+            <div
+              className="informationStyle menuRow informationFont"
+              style={{ paddingLeft: "20px" }}
+            >
+              <div className="menuCol">
+                <p>Assigned Nurse:</p>
+                <p>Allergies:</p>
+              </div>
+              <div className="menuCol" style={{ marginLeft: "20px" }}>
+                <p>{list.nurse}</p>
+                <p>{list.allergies.slice(1, -1)}</p>
+              </div>
+              <div className="menuCol" style={{ marginLeft: "110px" }}>
+                <p>Medical Conditions:</p>
+                <p>Medications:</p>
+              </div>
+              <div className="menuCol" style={{ marginLeft: "20px" }}>
+                <p>{list.medicalConditions.slice(1, -1)}</p>
+                <p>{list.medication.slice(1, -1)}</p>
+              </div>
+            </div>
           </div>
         </div>
       </div>
