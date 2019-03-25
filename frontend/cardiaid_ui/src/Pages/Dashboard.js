@@ -107,7 +107,10 @@ export default class Dashboard extends React.Component {
           getId={this.getId}
           cardPress={this.state.cardPress}
         />
-        <HalfMenu cardPress={this.state.cardPress} />
+        <HalfMenu
+          cardPress={this.state.cardPress}
+          currentList={this.state.currentList}
+        />
       </div>
     );
   }
