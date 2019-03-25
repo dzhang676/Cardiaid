@@ -24,8 +24,8 @@ class ArduinoInterface():
     def returnVitals(self):
         # red=0, ir=0, HR=-999, HRvalid=0, SPO2=-999, SPO2Valid=0
         curr = None
-        readings = str(self.sock.recv(100)).split("\\r\\n")
-        time.sleep(0.5)
+        readings = str(self.sock.recv(150)).split("\\r\\n")
+        time.sleep(0.7)
         for reading in readings:
             if reading[:3] == "red":
                 curr = reading.split(',')
