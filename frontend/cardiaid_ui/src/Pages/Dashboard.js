@@ -8,6 +8,7 @@ import HalfMenu from "./Components/HalfMenu";
 export default class Dashboard extends React.Component {
   constructor(props) {
     super(props);
+
     this.state = {
       height: props.height,
       width: props.width,
@@ -66,7 +67,7 @@ export default class Dashboard extends React.Component {
   };
 
   render() {
-    //console.log(this.state.cardPress);
+    console.log(this.state.timestamp);
     return (
       <div className="overlay col">
         <Navbar />
