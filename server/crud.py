@@ -4,6 +4,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_marshmallow import Marshmallow
 import os
 from deviceInterface import ArduinoInterface
+import datetime
 
 import threading
 app = Flask(__name__)
@@ -26,10 +27,11 @@ class Patient(db.Model):
     medicalConditions = db.Column(db.String(120), unique=False)
     notes = db.Column(db.String(120), unique=False)
     nurse = db.Column(db.Integer, unique=False)
-    deviceStatus = db.Column(db.Boolean, unique = False)
-
+    HRValid = db.Column(db.Integer, unique = False)
+    BOValid = db.Column(db.Integer, unique = False)
+    currentTime = db.Column(db.String(120), unique=False)
     def __init__(self, id, name, age, medication, roomNumber, heartRate, bloodOxygen, 
-        birthDate, sex, allergies, medicalConditions, notes, nurse, deviceStatus):
+        birthDate, sex, allergies, medicalConditions, notes, nurse, HRValid, BOValid, currentTime):
         self.id = id
         self.name = name
         self.age = age
@@ -43,13 +45,15 @@ class Patient(db.Model):
         self.medicalConditions = medicalConditions
         self.notes = notes
         self.nurse = nurse
-        self.deviceStatus = deviceStatus
+        self.HRValid = HRValid
+        self.BOValid = BOValid
+        self.currentTime = currentTime
 
 class PatientSchema(ma.Schema):
     class Meta:
         # Fields to expose
         fields = ('name', 'age', 'medication', 'roomNumber', 'heartRate', 'bloodOxygen', 
-        'birthDate', 'sex', 'allergies', 'medicalConditions', 'notes', 'nurse', 'deviceStatus')
+        'birthDate', 'sex', 'allergies', 'medicalConditions', 'notes', 'nurse', 'HRValid', 'BOValid', "currentTime")
 
 class User(db.Model):
     userName = db.Column(db.String(120), primary_key=True)
@@ -79,24 +83,6 @@ class NurseSchema(ma.Schema):
         # Fields to expose
         fields = ('nurseId', 'name', 'patientList')
 
-class Alerts(db.Model):
-    alertId = db.Column(db.Integer, primary_key=True)
-    nurse = db.Column(db.Integer, unique=False)
-    heartRate = db.Column(db.Integer, unique=False)
-    bloodOxygen = db.Column(db.Integer, unique=False)
-    reason = db.Column(db.String(120), unique=False)
-    def __init__(self, alertId, nurse, heartRate, bloodOxygen, reason):
-        self.alertId = alertId
-        self.nurse = nurse
-        self.heartRate = heartRate
-        self.bloodOxygen = bloodOxygen
-        self.reason = reason
-
-class AlertSchema(ma.Schema):
-    class Meta:
-        # Fields to expose
-        fields = ('alertId', 'nurse', 'heartRate', 'bloodOxygen', 'reason')
-
 patient_schema = PatientSchema()
 patients_schema = PatientSchema(many=True)
 
@@ -106,30 +92,25 @@ users_schema = UserSchema(many=True)
 nurse_schema = NurseSchema()
 nurses_schema = NurseSchema(many=True)
 
-alerts_schema = AlertSchema(many=True)
-
 class ArduinoReadingThread(threading.Thread):
     arduinoInterface = ArduinoInterface()
     def __init__(self):
        threading.Thread.__init__(self)
 
     def run(self):
+        return
         while(True):
             data = self.arduinoInterface.returnVitals()
-            user = User.query.get('masterUser')
-            if user.password != data["HR"]: # change this code
-                user.password = data["HR"]
-                db.session.commit()
+            patient = Patient.query.get(1)
+            patient.bloodOxygen = data["BO"]
+            patient.heartRate = data["HR"]
+            patient.HRValid =  data["HRValid"]
+            patient.BOValid = data["BOValid"]
+            patient.currentTime = str(datetime.datetime.now()).split(" ")[1].split('.')[0]
+            db.session.commit()
 
 arduinoReadingThread = ArduinoReadingThread()
 arduinoReadingThread.start()
-
-# endpoint to return all alerts
-@app.route("/alerts", methods=["GET"])
-def get_alerts():
-    all_alerts = Alerts.query.all()
-    result = alerts_schema.dump(all_alerts)
-    return jsonify(result.data)
 
 # get individual nurse
 @app.route("/nurse/<nurseId>", methods=["GET"])
@@ -215,10 +196,11 @@ def add_patient():
     medicalConditions = request.args['medicalConditions']
     notes = request.args['notes']
     nurse = request.args['nurse']
-    deviceStatus = request.args['deviceStatus']
-    
+    HRValid = request.args['HRValid']
+    BOValid = request.args["BOValid"]
+    currentTime = request.args["currentTime"]
     new_patient = Patient(id, name, age, medication, roomNumber, heartRate, bloodOxygen, 
-        birthDate, sex, allergies, medicalConditions, notes, nurse, deviceStatus)
+        birthDate, sex, allergies, medicalConditions, notes, nurse, HRValid, BOValid, currentTime)
 
     db.session.add(new_patient)
     db.session.commit()
@@ -257,7 +239,9 @@ def patient_update(id):
     medicalConditions = request.args['medicalConditions']
     notes = request.args['notes']
     nurse = request.args['nurse']
-    deviceStatus = request.args['deviceStatus']
+    HRValid = request.args['HRValid']
+    BOValid = request.args["BOValid"]
+    currentTime = request.args["currentTime"]
     patient.id = id
     patient.name = name
     patient.age = age
@@ -271,7 +255,9 @@ def patient_update(id):
     patient.medicalConditions = medicalConditions
     patient.notes = notes
     patient.nurese = nurse
-    patient.deviceStatus = deviceStatus
+    patient.HRValid = HRValid
+    patient.BOValid = BOValid
+    patient.currentTime = currentTime
     db.session.commit()
     return patient_schema.jsonify(patient)
 
