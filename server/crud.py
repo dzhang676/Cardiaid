@@ -2,11 +2,11 @@ import datetime
 from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_marshmallow import Marshmallow
-import os
 from deviceInterface import ArduinoInterface
-import datetime
-
+import os
+import time
 import threading
+import bluetooth
 app = Flask(__name__)
 basedir = os.path.abspath(os.path.dirname(__file__))
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'crud.sqlite')
@@ -91,26 +91,22 @@ users_schema = UserSchema(many=True)
 
 nurse_schema = NurseSchema()
 nurses_schema = NurseSchema(many=True)
-
-class ArduinoReadingThread(threading.Thread):
+     
+def readBluetooth():
     arduinoInterface = ArduinoInterface()
-    def __init__(self):
-       threading.Thread.__init__(self)
+    while(True):
+        data = arduinoInterface.returnVitals()
+        patient = Patient.query.get(1)
+        patient.bloodOxygen = data["BO"]
+        patient.heartRate = data["HR"]
+        patient.HRValid =  data["HRValid"]
+        patient.BOValid = data["BOValid"]
+        patient.currentTime = str(datetime.datetime.now()).split(" ")[1].split('.')[0]
+        print("committing")
+        db.session.commit()
 
-    def run(self):
-        return
-        while(True):
-            data = self.arduinoInterface.returnVitals()
-            patient = Patient.query.get(1)
-            patient.bloodOxygen = data["BO"]
-            patient.heartRate = data["HR"]
-            patient.HRValid =  data["HRValid"]
-            patient.BOValid = data["BOValid"]
-            patient.currentTime = str(datetime.datetime.now()).split(" ")[1].split('.')[0]
-            db.session.commit()
-
-arduinoReadingThread = ArduinoReadingThread()
-arduinoReadingThread.start()
+thread1 = threading.Thread(target=readBluetooth)
+thread1.start()
 
 # get individual nurse
 @app.route("/nurse/<nurseId>", methods=["GET"])
