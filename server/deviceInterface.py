@@ -34,37 +34,38 @@ class ArduinoInterface():
         if len(readings) < 140:
             time.sleep(0.5)
         else:
-            readings = readings.split("\\r\\n")
-            for reading in readings:
-                if reading[:3] == "red":
-                    curr = reading.split(',')
-                    break
-            print(curr)
-            if curr is not None and curr[0][:3] == "red" and curr[-1][1:10] == 'SPO2Valid':
-                if curr[-1].split('=')[1] == 0:
-                    
-                    self.data["BOValid"] = 0
-                    self.BOcache.clear()
-                else:
-                    self.data["BOValid"] = 1
-                    self.BOcache.append(float(curr[-2].split('=')[1]))
-                if curr[-3].split('=')[1] == 0:
-                    self.data["HRValid"] = 0
-                    self.HRcache.clear()
-                else:
-                    self.data["HRValid"] = 1
-                    self.HRcache.append(float(curr[2].split('=')[1]))
+            try:
+                readings = readings.split("\\r\\n")
+                for reading in readings:
+                    if reading[:3] == "red":
+                        curr = reading.split(',')
+                        break
+                print(curr)
+                if curr is not None and curr[0][:3] == "red" and curr[-1][1:10] == 'SPO2Valid':
+                    if curr[-1].split('=')[1] == 0:
+                        self.data["BOValid"] = 0
+                        self.BOcache.clear()
+                    else:
+                        self.BOcache.append(float(curr[-2].split('=')[1]))
+                    if curr[-3].split('=')[1] == 0:
+                        self.data["HRValid"] = 0
+                        self.HRcache.clear()
+                    else:
+                        self.HRcache.append(float(curr[2].split('=')[1]))
 
-                if len(self.HRcache) >= 10:
-                    avgHR = sum(self.HRcache) // 10
-                    self.HRcache.clear()
-                    self.data["HR"] = avgHR
+                    if len(self.HRcache) >= 10:
+                        avgHR = sum(self.HRcache) // 10
+                        self.HRcache.clear()
+                        self.data["HRValid"] = 1
+                        self.data["HR"] = avgHR
 
-                if len(self.BOcache) >= 10:
-                    avgBO = sum(self.BOcache) // 10
-                    self.BOcache.clear()
-                    self.data["BO"] = avgBO
-        
+                    if len(self.BOcache) >= 10:
+                        avgBO = sum(self.BOcache) // 10
+                        self.BOcache.clear()
+                        self.data["BOValid"] = 1
+                        self.data["BO"] = avgBO
+            except:
+                print("reading/parsing went wrong")
         return self.data
 
 
