@@ -11,9 +11,11 @@ import time
 # sock = bluetooth.BluetoothSocket( bluetooth.RFCOMM )
 # sock.connect((bd_addr, port))
 class ArduinoInterface():
-    #nearby_devices = bluetooth.discover_devices()
     bd_addr = "00:14:03:06:8D:0F"
-    data = {"HRValid": True, "BOValid": True, "HR": 0, "BO":0}
+    HRValid = 0
+    BOValid = 0
+    HR = -999
+    BO = -999
     HRcache = []
     BOcache = []
     port = 1
@@ -29,44 +31,48 @@ class ArduinoInterface():
 
     def returnVitals(self):
         # red=0, ir=0, HR=-999, HRvalid=0, SPO2=-999, SPO2Valid=0
-        curr = None
-        readings = str(self.sock.recv(140))
-        if len(readings) < 140:
-            time.sleep(0.5)
-        else:
-            try:
+        try:
+            curr = None
+            readings = str(self.sock.recv(140))
+            if len(readings) < 140:
+                time.sleep(0.5)
+            else:
                 readings = readings.split("\\r\\n")
                 for reading in readings:
                     if reading[:3] == "red":
                         curr = reading.split(',')
                         break
-                print(curr)
                 if curr is not None and curr[0][:3] == "red" and curr[-1][1:10] == 'SPO2Valid':
-                    if curr[-1].split('=')[1] == 0:
-                        self.data["BOValid"] = 0
+                    print(curr)
+                    if curr[-1].split('=')[1] == '0':
+                        self.BOValid = 0
                         self.BOcache.clear()
+                        print("BO cleared")
                     else:
                         self.BOcache.append(float(curr[-2].split('=')[1]))
-                    if curr[-3].split('=')[1] == 0:
-                        self.data["HRValid"] = 0
+                    if curr[-3].split('=')[1] == '0':
+                        self.HRValid = 0
                         self.HRcache.clear()
+                        print("HR cleared")
                     else:
                         self.HRcache.append(float(curr[2].split('=')[1]))
 
                     if len(self.HRcache) >= 10:
                         avgHR = sum(self.HRcache) // 10
                         self.HRcache.clear()
-                        self.data["HRValid"] = 1
-                        self.data["HR"] = avgHR
+                        self.HR = avgHR
+                        print("HR updated")
+                        print(avgHR)
 
                     if len(self.BOcache) >= 10:
                         avgBO = sum(self.BOcache) // 10
                         self.BOcache.clear()
-                        self.data["BOValid"] = 1
-                        self.data["BO"] = avgBO
-            except:
-                print("reading/parsing went wrong")
-        return self.data
+                        self.BO = avgBO
+                        print("BO updated")
+                        print(avgBO)
+        except:
+            return None
+        return {"HRValid": self.HRValid, "BOValid": self.BOValid, "HR": self.HR, "BO":self.BO}
 
 
 

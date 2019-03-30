@@ -96,14 +96,14 @@ def readBluetooth():
     arduinoInterface = ArduinoInterface()
     while(True):
         data = arduinoInterface.returnVitals()
-        patient = Patient.query.get(1)
-        patient.bloodOxygen = data["BO"]
-        patient.heartRate = data["HR"]
-        patient.HRValid =  data["HRValid"]
-        patient.BOValid = data["BOValid"]
-        patient.currentTime = str(datetime.datetime.now()).split(" ")[1].split('.')[0]
-        print("committing")
-        db.session.commit()
+        if data is not None:
+            patient = Patient.query.get(1)
+            patient.bloodOxygen = data["BO"]
+            patient.heartRate = data["HR"]
+            patient.HRValid =  data["HRValid"]
+            patient.BOValid = data["BOValid"]
+            patient.currentTime = str(datetime.datetime.now()).split(" ")[1].split('.')[0]
+            db.session.commit()
 
 thread1 = threading.Thread(target=readBluetooth)
 thread1.start()
