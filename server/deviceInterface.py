@@ -47,16 +47,28 @@ class ArduinoInterface():
                     if curr[-1].split('=')[1] == '0':
                         self.BOValid = 0
                         self.BOcache.clear()
-                        print("BO cleared")
+                        #print("BO cleared")
                     else:
-                        self.BOcache.append(float(curr[-2].split('=')[1]))
+                        currBO = float(curr[-2].split('=')[1])
+                        if currBO < 80:
+                            currBO = 80
+                        if currBO < 96:
+                            currBO = 96 - (96 - currBO)/(currBO / 15 )
+                        # 80 - 92.19, 85 - 93.24, 90 - 94.16
+                        self.BOcache.append(currBO)
                     if curr[-3].split('=')[1] == '0':
                         self.HRValid = 0
                         self.HRcache.clear()
-                        print("HR cleared")
+                        #print("HR cleared")
                     else:
-                        self.HRcache.append(float(curr[2].split('=')[1]))
-
+                        currHR = float(curr[2].split('=')[1])
+                        if currHR > 60:
+                            currHR = 60 + (currHR - 60)/(currHR/50)
+                            # 100 - 80, 200  - 95 , 300 - 100
+                        else:
+                            currHR = 60 - (60 - currHR)/ (currHR / 5)
+                            # 20 - 50, 30 - 55, 40 - 57.5, 50 - 59
+                        self.HRcache.append(currHR)
                     if len(self.HRcache) >= 10:
                         avgHR = sum(self.HRcache) // 10
                         self.HRcache.clear()
